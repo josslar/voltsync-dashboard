@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
 import { initialDevices, type Device, type HistoryEntry } from "@/lib/api/voltrex";
 
 interface DevicesState {
