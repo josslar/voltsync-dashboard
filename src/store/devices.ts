@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
 import { initialDevices, type Device, type HistoryEntry } from "@/lib/api/voltrex";
 
 interface DevicesState {
@@ -43,6 +43,12 @@ export const useDevices = create<DevicesState>()(
           ].slice(0, 200),
         }),
     }),
-    { name: "voltrex-devices" },
+    {
+      name: "voltrex-devices",
+      storage: createJSONStorage(() =>
+        typeof window !== "undefined" ? window.localStorage : (undefined as never),
+      ),
+      skipHydration: typeof window === "undefined",
+    },
   ),
 );
