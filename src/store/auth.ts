@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
 
 interface AuthState {
   email: string | null;
@@ -14,6 +14,12 @@ export const useAuth = create<AuthState>()(
       login: (email) => set({ email }),
       logout: () => set({ email: null }),
     }),
-    { name: "voltrex-auth" },
+    {
+      name: "voltrex-auth",
+      storage: createJSONStorage(() =>
+        typeof window !== "undefined" ? window.localStorage : (undefined as never),
+      ),
+      skipHydration: typeof window === "undefined",
+    },
   ),
 );
