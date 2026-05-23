@@ -43,6 +43,12 @@ export const useDevices = create<DevicesState>()(
           ].slice(0, 200),
         }),
     }),
-    { name: "voltrex-devices" },
+    {
+      name: "voltrex-devices",
+      storage: createJSONStorage(() =>
+        typeof window !== "undefined" ? window.localStorage : (undefined as never),
+      ),
+      skipHydration: typeof window === "undefined",
+    },
   ),
 );
