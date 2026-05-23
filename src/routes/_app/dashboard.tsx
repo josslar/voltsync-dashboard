@@ -140,7 +140,7 @@ function DashboardPage() {
                   fontSize: 12,
                 }}
                 labelFormatter={(t) => new Date(Number(t)).toLocaleTimeString()}
-                formatter={(v: number) => [`${v.toFixed(1)} W`, "Power"]}
+                formatter={(v) => [`${Number(v).toFixed(1)} W`, "Power"]}
               />
               <Area
                 type="monotone"
