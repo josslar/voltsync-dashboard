@@ -5,19 +5,16 @@ import {
   Cpu,
   Sparkles,
   History,
+  Bell,
+  Settings,
   Zap,
   X,
   LogOut,
 } from "lucide-react";
 import { useAuth } from "@/store/auth";
 import { useNavigate } from "@tanstack/react-router";
-
-const items = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/devices", label: "Devices", icon: Cpu },
-  { to: "/predictions", label: "Predictions", icon: Sparkles },
-  { to: "/history", label: "History", icon: History },
-] as const;
+import { useTranslation } from "@/lib/i18n";
+import { useAppStore } from "@/store/app";
 
 export function AppSidebar({
   mobileOpen,
@@ -74,6 +71,18 @@ function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
   const logout = useAuth((s) => s.logout);
   const navigate = useNavigate();
 
+  const lang = useAppStore((s) => s.language);
+  const t = useTranslation(lang);
+
+  const items = [
+    { to: "/dashboard", label: t("dashboard"), icon: LayoutDashboard },
+    { to: "/devices", label: t("devices"), icon: Cpu },
+    { to: "/predictions", label: t("predictions"), icon: Sparkles },
+    { to: "/history", label: t("history"), icon: History },
+    { to: "/notifications", label: t("notifications"), icon: Bell },
+    { to: "/settings", label: t("settings"), icon: Settings },
+  ] as const;
+
   return (
     <div className="flex flex-col h-full">
       <div className="px-5 py-6 flex items-center gap-3">
@@ -129,7 +138,7 @@ function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
           </div>
           <div className="flex-1 min-w-0">
             <div className="text-sm truncate">{email}</div>
-            <div className="text-[10px] text-muted-foreground">Operator</div>
+            <div className="text-[10px] text-muted-foreground">{t("operator")}</div>
           </div>
           <button
             onClick={() => {
@@ -137,7 +146,8 @@ function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
               navigate({ to: "/login" });
             }}
             className="p-2 rounded-md hover:bg-sidebar-accent transition text-muted-foreground hover:text-foreground"
-            aria-label="Log out"
+            aria-label={t("logout")}
+            title={t("logout")}
           >
             <LogOut className="h-4 w-4" />
           </button>

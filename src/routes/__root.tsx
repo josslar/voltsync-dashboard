@@ -7,7 +7,8 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-
+import { useEffect } from "react";
+import { useAppStore } from "@/store/app";
 import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
@@ -82,12 +83,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: React.ReactNode }) {
+  // We apply dark mode by default to avoid flash, then let client hydrate
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="dark" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
-      <body className="dark">
+      <body suppressHydrationWarning>
         {children}
         <Scripts />
       </body>
@@ -97,6 +99,25 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const theme = useAppStore((s) => s.theme);
+  const language = useAppStore((s) => s.language);
+
+  useEffect(() => {
+    const isDark =
+      theme === "dark" ||
+      (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    
+    if (isDark) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [theme]);
+
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
