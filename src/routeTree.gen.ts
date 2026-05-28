@@ -14,10 +14,12 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AppPredictionsRouteImport } from './routes/_app/predictions'
+import { Route as AppPaymentsRouteImport } from './routes/_app/payments'
 import { Route as AppNotificationsRouteImport } from './routes/_app/notifications'
 import { Route as AppHistoryRouteImport } from './routes/_app/history'
 import { Route as AppDevicesRouteImport } from './routes/_app/devices'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
+import { Route as AppChatbotRouteImport } from './routes/_app/chatbot'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -43,6 +45,11 @@ const AppPredictionsRoute = AppPredictionsRouteImport.update({
   path: '/predictions',
   getParentRoute: () => AppRoute,
 } as any)
+const AppPaymentsRoute = AppPaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppNotificationsRoute = AppNotificationsRouteImport.update({
   id: '/notifications',
   path: '/notifications',
@@ -63,24 +70,33 @@ const AppDashboardRoute = AppDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AppRoute,
 } as any)
+const AppChatbotRoute = AppChatbotRouteImport.update({
+  id: '/chatbot',
+  path: '/chatbot',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/chatbot': typeof AppChatbotRoute
   '/dashboard': typeof AppDashboardRoute
   '/devices': typeof AppDevicesRoute
   '/history': typeof AppHistoryRoute
   '/notifications': typeof AppNotificationsRoute
+  '/payments': typeof AppPaymentsRoute
   '/predictions': typeof AppPredictionsRoute
   '/settings': typeof AppSettingsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/chatbot': typeof AppChatbotRoute
   '/dashboard': typeof AppDashboardRoute
   '/devices': typeof AppDevicesRoute
   '/history': typeof AppHistoryRoute
   '/notifications': typeof AppNotificationsRoute
+  '/payments': typeof AppPaymentsRoute
   '/predictions': typeof AppPredictionsRoute
   '/settings': typeof AppSettingsRoute
 }
@@ -89,10 +105,12 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
+  '/_app/chatbot': typeof AppChatbotRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/devices': typeof AppDevicesRoute
   '/_app/history': typeof AppHistoryRoute
   '/_app/notifications': typeof AppNotificationsRoute
+  '/_app/payments': typeof AppPaymentsRoute
   '/_app/predictions': typeof AppPredictionsRoute
   '/_app/settings': typeof AppSettingsRoute
 }
@@ -101,20 +119,24 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/chatbot'
     | '/dashboard'
     | '/devices'
     | '/history'
     | '/notifications'
+    | '/payments'
     | '/predictions'
     | '/settings'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
+    | '/chatbot'
     | '/dashboard'
     | '/devices'
     | '/history'
     | '/notifications'
+    | '/payments'
     | '/predictions'
     | '/settings'
   id:
@@ -122,10 +144,12 @@ export interface FileRouteTypes {
     | '/'
     | '/_app'
     | '/login'
+    | '/_app/chatbot'
     | '/_app/dashboard'
     | '/_app/devices'
     | '/_app/history'
     | '/_app/notifications'
+    | '/_app/payments'
     | '/_app/predictions'
     | '/_app/settings'
   fileRoutesById: FileRoutesById
@@ -173,6 +197,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPredictionsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/payments': {
+      id: '/_app/payments'
+      path: '/payments'
+      fullPath: '/payments'
+      preLoaderRoute: typeof AppPaymentsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/notifications': {
       id: '/_app/notifications'
       path: '/notifications'
@@ -201,23 +232,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/chatbot': {
+      id: '/_app/chatbot'
+      path: '/chatbot'
+      fullPath: '/chatbot'
+      preLoaderRoute: typeof AppChatbotRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
+  AppChatbotRoute: typeof AppChatbotRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppDevicesRoute: typeof AppDevicesRoute
   AppHistoryRoute: typeof AppHistoryRoute
   AppNotificationsRoute: typeof AppNotificationsRoute
+  AppPaymentsRoute: typeof AppPaymentsRoute
   AppPredictionsRoute: typeof AppPredictionsRoute
   AppSettingsRoute: typeof AppSettingsRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppChatbotRoute: AppChatbotRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppDevicesRoute: AppDevicesRoute,
   AppHistoryRoute: AppHistoryRoute,
   AppNotificationsRoute: AppNotificationsRoute,
+  AppPaymentsRoute: AppPaymentsRoute,
   AppPredictionsRoute: AppPredictionsRoute,
   AppSettingsRoute: AppSettingsRoute,
 }

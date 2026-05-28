@@ -10,6 +10,8 @@ import {
   Zap,
   X,
   LogOut,
+  MessageSquare,
+  CreditCard,
 } from "lucide-react";
 import { useAuth } from "@/store/auth";
 import { useNavigate } from "@tanstack/react-router";
@@ -73,11 +75,15 @@ function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
 
   const lang = useAppStore((s) => s.language);
   const t = useTranslation(lang);
+  const notifications = useAppStore((s) => s.notifications);
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   const items = [
     { to: "/dashboard", label: t("dashboard"), icon: LayoutDashboard },
     { to: "/devices", label: t("devices"), icon: Cpu },
     { to: "/predictions", label: t("predictions"), icon: Sparkles },
+    { to: "/chatbot", label: t("chatbot"), icon: MessageSquare },
+    { to: "/payments", label: t("payments"), icon: CreditCard },
     { to: "/history", label: t("history"), icon: History },
     { to: "/notifications", label: t("notifications"), icon: Bell },
     { to: "/settings", label: t("settings"), icon: Settings },
@@ -124,7 +130,13 @@ function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
                   />
                 )}
                 <Icon className={`h-4 w-4 relative ${active ? "text-primary-glow" : ""}`} />
-                <span className="relative">{it.label}</span>
+                <span className="relative flex-1">{it.label}</span>
+                {it.to === "/notifications" && unreadCount > 0 && (
+                  <span className="relative flex h-1.5 w-1.5 shrink-0">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75" />
+                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-destructive" />
+                  </span>
+                )}
               </motion.div>
             </Link>
           );

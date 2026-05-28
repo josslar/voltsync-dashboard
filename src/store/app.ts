@@ -20,6 +20,9 @@ interface AppState {
   powerSource: PowerSource;
   energyUnits: number;
   notifications: AppNotification[];
+  energyBudget: number;
+  utilityProvider: string;
+  meterId: string;
   
   setTheme: (theme: Theme) => void;
   setLanguage: (lang: Language) => void;
@@ -27,6 +30,9 @@ interface AppState {
   setEnergyUnits: (units: number | ((prev: number) => number)) => void;
   pushNotification: (n: Omit<AppNotification, "id" | "ts" | "read">) => void;
   markNotificationRead: (id: string) => void;
+  setEnergyBudget: (budget: number) => void;
+  setUtilityProvider: (provider: string) => void;
+  setMeterId: (meterId: string) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -37,6 +43,9 @@ export const useAppStore = create<AppState>()(
       powerSource: "grid",
       energyUnits: 150.0, // Starting units
       notifications: [],
+      energyBudget: 350.0,
+      utilityProvider: "TANESCO (TZ)",
+      meterId: "MTR-4029-VOLT",
 
       setTheme: (theme) => set({ theme }),
       setLanguage: (language) => set({ language }),
@@ -63,6 +72,9 @@ export const useAppStore = create<AppState>()(
             n.id === id ? { ...n, read: true } : n
           ),
         }),
+      setEnergyBudget: (energyBudget) => set({ energyBudget }),
+      setUtilityProvider: (utilityProvider) => set({ utilityProvider }),
+      setMeterId: (meterId) => set({ meterId }),
     }),
     {
       name: "voltrex-app-settings",

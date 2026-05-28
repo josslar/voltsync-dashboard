@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { Sparkles, Zap, CheckCircle2, TrendingDown, Clock, Battery } from "lucide-react";
+import { Sparkles, Zap, CheckCircle2, TrendingDown, Clock, Battery, Cpu, Sun } from "lucide-react";
 
 export const Route = createFileRoute("/_app/predictions")({
   component: PredictionsPage,
@@ -71,6 +71,33 @@ function buildPredictions(devices: Device[]): Prediction[] {
       icon: Battery,
       color: "oklch(0.72 0.18 155)",
     },
+    {
+      id: "p4",
+      title: "Optimize Server Rack cooling cycle",
+      impact: "Conserve ~120W of continuous standby power",
+      confidence: 0.88,
+      action: "optimize-servers",
+      icon: Cpu,
+      color: "oklch(0.72 0.22 300)",
+    },
+    {
+      id: "p5",
+      title: "Discharge Solar Battery during grid peak",
+      impact: "Offset peak TZS rates using clean reserves",
+      confidence: 0.95,
+      action: "discharge-solar",
+      icon: Sun,
+      color: "oklch(0.78 0.17 75)",
+    },
+    {
+      id: "p6",
+      title: "Dim Smart Lights to 85% after 22:00",
+      impact: "Reduce nocturnal grid drain by 45W",
+      confidence: 0.79,
+      action: "dim-lights",
+      icon: Zap,
+      color: "oklch(0.72 0.18 155)",
+    },
   ];
 }
 
@@ -95,6 +122,8 @@ function PredictionsPage() {
   }, []);
 
   const predictions = buildPredictions(devices);
+  const appliedCount = Object.values(applied).filter(Boolean).length;
+  const efficiencyScore = 76 + Math.round((appliedCount / predictions.length) * 20);
 
   const apply = (id: string, title: string) => {
     setApplied((a) => ({ ...a, [id]: true }));
@@ -150,11 +179,13 @@ function PredictionsPage() {
             Grid efficiency score
           </div>
           <div className="mt-1 text-3xl font-semibold tracking-tight">
-            <span style={{ color: "oklch(0.72 0.22 300)" }}>84</span>
+            <span style={{ color: "oklch(0.72 0.22 300)" }}>{efficiencyScore}</span>
             <span className="text-muted-foreground text-lg">/100</span>
           </div>
           <div className="text-xs text-muted-foreground mt-0.5">
-            Apply all suggestions to reach 96+
+            {appliedCount === predictions.length
+              ? "Optimal efficiency reached! All suggestions applied."
+              : `Apply all suggestions to reach 96+ (Current: ${appliedCount}/${predictions.length} applied)`}
           </div>
         </div>
         <div className="w-full sm:w-64">
@@ -165,8 +196,8 @@ function PredictionsPage() {
           <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: "oklch(0.22 0.02 285)" }}>
             <motion.div
               initial={{ width: 0 }}
-              animate={{ width: "84%" }}
-              transition={{ delay: 0.7, duration: 1, ease: "easeOut" }}
+              animate={{ width: `${efficiencyScore}%` }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
               className="h-full rounded-full"
               style={{ background: "linear-gradient(90deg, oklch(0.58 0.24 295), oklch(0.72 0.22 300))" }}
             />

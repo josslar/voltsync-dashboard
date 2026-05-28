@@ -23,12 +23,24 @@ function NotificationsPage() {
   const setEnergyUnits = useAppStore((s) => s.setEnergyUnits);
   const notifications = useAppStore((s) => s.notifications);
   const pushNotification = useAppStore((s) => s.pushNotification);
+  const markNotificationRead = useAppStore((s) => s.markNotificationRead);
 
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Mark all unread notifications as read when viewing the feed
+  useEffect(() => {
+    if (mounted) {
+      notifications.forEach((n) => {
+        if (!n.read) {
+          markNotificationRead(n.id);
+        }
+      });
+    }
+  }, [mounted, notifications, markNotificationRead]);
 
   // Simulation Effect
   useEffect(() => {

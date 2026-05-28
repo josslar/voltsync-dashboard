@@ -42,7 +42,13 @@ export const translations = {
     systemWarning: "Warning",
     systemCritical: "Critical",
     logout: "Log out",
-    operator: "Operator"
+    operator: "Operator",
+    chatbot: "AI Assistant",
+    payments: "Buy Units",
+    meterNumber: "Meter Number",
+    paymentProvider: "Payment Provider",
+    amount: "Amount (TZS)",
+    phone: "Phone Number"
   },
   sw: {
     dashboard: "Dashibodi",
@@ -85,7 +91,13 @@ export const translations = {
     systemWarning: "Onyo",
     systemCritical: "Hatari",
     logout: "Toka",
-    operator: "Mhudumu"
+    operator: "Mhudumu",
+    chatbot: "Msaidizi wa AI",
+    payments: "Nunua Vipimo",
+    meterNumber: "Namba ya Mita",
+    paymentProvider: "Njia ya Malipo",
+    amount: "Kiasi (TZS)",
+    phone: "Namba ya Simu"
   },
   de: {
     dashboard: "Übersicht",
@@ -128,7 +140,13 @@ export const translations = {
     systemWarning: "Warnung",
     systemCritical: "Kritisch",
     logout: "Abmelden",
-    operator: "Bediener"
+    operator: "Bediener",
+    chatbot: "KI-Assistent",
+    payments: "Einheiten kaufen",
+    meterNumber: "Zählernummer",
+    paymentProvider: "Zahlungsanbieter",
+    amount: "Betrag (TZS)",
+    phone: "Telefonnummer"
   }
 };
 

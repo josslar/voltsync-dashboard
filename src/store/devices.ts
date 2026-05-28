@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type { HistoryEntry } from "@/lib/api/voltrex";
+import { useAppStore } from "@/store/app";
 
 export interface Device {
   id: string;
@@ -59,10 +60,17 @@ export const useDevices = create<DevicesState>()(
             d.id === id ? { ...d, status: next } : d,
           ),
         });
-        get().pushHistory({
+        const historyEntry = {
           event: `${dev.name} turned ${next.toUpperCase()}`,
           detail: `${dev.room} · ${dev.watts}W`,
-          level: "info",
+          level: "info" as const,
+        };
+        get().pushHistory(historyEntry);
+        // Also push to app-wide notifications so the Notifications tab shows it
+        useAppStore.getState().pushNotification({
+          title: `Device ${next === "on" ? "Activated" : "Deactivated"}`,
+          message: `${dev.name} in ${dev.room} was turned ${next.toUpperCase()} (${dev.watts}W)`,
+          level: next === "on" ? "info" : "warning",
         });
       },
       addDevice: (deviceData) => {
@@ -72,9 +80,22 @@ export const useDevices = create<DevicesState>()(
           ...deviceData
         };
         set({ devices: [...get().devices, newDevice] });
+        useAppStore.getState().pushNotification({
+          title: "New Device Added",
+          message: `${deviceData.name} (${deviceData.watts}W) added to ${deviceData.room}`,
+          level: "info",
+        });
       },
       removeDevice: (id) => {
+        const dev = get().devices.find((d) => d.id === id);
         set({ devices: get().devices.filter((d) => d.id !== id) });
+        if (dev) {
+          useAppStore.getState().pushNotification({
+            title: "Device Removed",
+            message: `${dev.name} has been removed from ${dev.room}`,
+            level: "warning",
+          });
+        }
       },
       addRoom: (room) => {
         if (!get().rooms.includes(room)) {

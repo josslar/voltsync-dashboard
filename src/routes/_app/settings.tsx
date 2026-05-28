@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { Plus, Trash2, Settings2, Globe, Monitor, Sun, Moon } from "lucide-react";
+import { Plus, Trash2, Settings2, Globe, Monitor, Sun, Moon, Zap } from "lucide-react";
 import { useDevices } from "@/store/devices";
 import { useAppStore } from "@/store/app";
 import { useTranslation } from "@/lib/i18n";
@@ -30,12 +30,45 @@ function SettingsPage() {
   const addRoom = useDevices((s) => s.addRoom);
   const removeRoom = useDevices((s) => s.removeRoom);
 
+  const energyBudget = useAppStore((s) => s.energyBudget);
+  const utilityProvider = useAppStore((s) => s.utilityProvider);
+  const meterId = useAppStore((s) => s.meterId);
+  const setEnergyBudget = useAppStore((s) => s.setEnergyBudget);
+  const setUtilityProvider = useAppStore((s) => s.setUtilityProvider);
+  const setMeterId = useAppStore((s) => s.setMeterId);
+  const pushNotification = useAppStore((s) => s.pushNotification);
+
   const [newDeviceName, setNewDeviceName] = useState("");
   const [newDeviceWatts, setNewDeviceWatts] = useState("");
   const [newDeviceRoom, setNewDeviceRoom] = useState("");
   const [newRoomName, setNewRoomName] = useState("");
 
-  useEffect(() => setMounted(true), []);
+  const [tempMeterId, setTempMeterId] = useState("");
+  const [tempBudget, setTempBudget] = useState("");
+  const [tempProvider, setTempProvider] = useState("");
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (mounted) {
+      setTempMeterId(meterId);
+      setTempBudget(String(energyBudget));
+      setTempProvider(utilityProvider);
+    }
+  }, [mounted, meterId, energyBudget, utilityProvider]);
+
+  const handleSaveUtilitySettings = () => {
+    setMeterId(tempMeterId);
+    setEnergyBudget(parseFloat(tempBudget) || 350);
+    setUtilityProvider(tempProvider);
+    pushNotification({
+      title: "Utility Configuration Updated",
+      message: `Successfully updated settings for meter ${tempMeterId} (${tempProvider}).`,
+      level: "info",
+    });
+  };
 
   const handleAddDevice = (e: React.FormEvent) => {
     e.preventDefault();
@@ -136,6 +169,70 @@ function SettingsPage() {
               </button>
             </div>
           </div>
+        </div>
+      </motion.div>
+
+      {/* Utility Settings Panel */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15 }}
+        className="panel p-6 rounded-2xl space-y-6"
+      >
+        <div className="flex items-center gap-3 mb-2">
+          <Zap className="h-5 w-5 text-primary-glow" />
+          <h3 className="text-lg font-medium">Utility & Grid Settings</h3>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Meter ID */}
+          <div className="space-y-2">
+            <label className="text-xs text-muted-foreground uppercase font-semibold">Registered LUKU Meter</label>
+            <input
+              type="text"
+              value={tempMeterId}
+              onChange={(e) => setTempMeterId(e.target.value.toUpperCase())}
+              placeholder="MTR-XXXX-XXXX"
+              className="w-full bg-secondary/50 border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+
+          {/* Monthly Budget */}
+          <div className="space-y-2">
+            <label className="text-xs text-muted-foreground uppercase font-semibold">Monthly Energy Budget (kWh)</label>
+            <input
+              type="number"
+              value={tempBudget}
+              onChange={(e) => setTempBudget(e.target.value)}
+              placeholder="350"
+              className="w-full bg-secondary/50 border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+
+          {/* Grid Operator */}
+          <div className="space-y-2">
+            <label className="text-xs text-muted-foreground uppercase font-semibold">Grid Operator / Utility</label>
+            <select
+              value={tempProvider}
+              onChange={(e) => setTempProvider(e.target.value)}
+              className="w-full bg-secondary/50 border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="TANESCO (TZ)">TANESCO (Tanzania)</option>
+              <option value="ZECO (ZN)">ZECO (Zanzibar)</option>
+              <option value="KPLC (KE)">Kenya Power (KPLC)</option>
+              <option value="UMEME (UG)">Umeme (Uganda)</option>
+              <option value="Custom Grid">Custom Grid / Microgrid</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="flex justify-end pt-2">
+          <button
+            onClick={handleSaveUtilitySettings}
+            className="bg-primary text-primary-foreground px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-primary/95 transition-all duration-200 glow-primary"
+          >
+            Apply Utility Settings
+          </button>
         </div>
       </motion.div>
 

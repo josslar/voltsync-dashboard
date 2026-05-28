@@ -13,6 +13,7 @@ import { useTelemetry } from "@/lib/hooks/useTelemetry";
 import { classifyVoltage } from "@/lib/api/voltrex";
 import { AnimatedNumber, VoltageGauge } from "@/components/voltrex/VoltageGauge";
 import { useDevices } from "@/store/devices";
+import { useAppStore } from "@/store/app";
 
 export const Route = createFileRoute("/_app/dashboard")({
   component: DashboardPage,
@@ -34,17 +35,26 @@ function DashboardPage() {
     .filter((d) => d.status === "on")
     .reduce((acc, d) => acc + d.watts, 0);
 
+  const energyUnits = useAppStore((s) => s.energyUnits);
+  const energyBudget = useAppStore((s) => s.energyBudget);
+  const utilityProvider = useAppStore((s) => s.utilityProvider);
+  const meterId = useAppStore((s) => s.meterId);
+  const powerSource = useAppStore((s) => s.powerSource);
+
   return (
     <div className="space-y-6">
       {/* hero */}
       <div className="grid lg:grid-cols-3 gap-6">
         <motion.div
           layout
-          className="panel rounded-2xl p-6 lg:col-span-2 relative overflow-hidden"
+          className="panel rounded-2xl p-6 lg:col-span-2 relative overflow-hidden flex flex-col justify-between min-h-[220px]"
         >
-          <div className="flex items-start justify-between">
+          <div className="absolute top-4 right-4 text-[10px] uppercase tracking-widest font-mono text-muted-foreground bg-secondary/80 px-2.5 py-1 rounded border border-border/40">
+            {utilityProvider} · {meterId}
+          </div>
+          <div className="flex items-start justify-between w-full">
             <div>
-              <div className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+              <div className="text-xs uppercase tracking-[0.18em] text-muted-foreground mt-1">
                 Live voltage
               </div>
               <div className="mt-2 flex items-baseline gap-2">
@@ -53,9 +63,14 @@ function DashboardPage() {
                 </div>
                 <div className="text-xl text-muted-foreground">V</div>
               </div>
-              <StatusPill status={status} />
+              <div className="flex flex-wrap items-center gap-2 mt-4">
+                <StatusPill status={status} />
+                <span className="text-[10px] text-muted-foreground uppercase tracking-widest bg-secondary/50 border border-border/30 px-3 py-1.5 rounded-full font-semibold">
+                  Source: {powerSource.toUpperCase()}
+                </span>
+              </div>
             </div>
-            <div className="hidden sm:block w-[55%] -mr-2 -mt-2">
+            <div className="hidden sm:block w-[50%] -mr-2 -mt-2">
               <VoltageGauge voltage={latest.voltage} />
             </div>
           </div>
@@ -64,24 +79,89 @@ function DashboardPage() {
           </div>
         </motion.div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-1 gap-4">
-          <StatCard
-            label="Active load"
-            value={<AnimatedNumber value={activePower} decimals={0} suffix=" W" />}
-            sub={`${devices.filter((d) => d.status === "on").length} devices on`}
-          />
-          <StatCard
-            label="Frequency"
-            value={
-              <AnimatedNumber
-                value={50 + (latest.voltage - 230) * 0.01}
-                decimals={2}
-                suffix=" Hz"
+        {/* Highlight balance / recharge widget */}
+        <motion.div
+          whileHover={{ y: -2 }}
+          className="panel rounded-2xl p-6 flex flex-col justify-between"
+        >
+          <div>
+            <div className="text-xs uppercase tracking-[0.18em] text-muted-foreground">LUKU Meter Balance</div>
+            <div className="mt-4 flex items-baseline gap-2">
+              <div className="text-5xl font-bold tracking-tight text-glow text-primary-glow">
+                <AnimatedNumber value={energyUnits} decimals={2} />
+              </div>
+              <div className="text-base text-muted-foreground">kWh</div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Sync: Registered to meter {meterId}
+            </p>
+          </div>
+          <div className="mt-4 pt-3 border-t border-border/40 flex items-center justify-between">
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+              Rate: ~350 TZS/kWh
+            </span>
+            <a
+              href="/payments"
+              className="text-xs text-primary-glow font-semibold hover:underline flex items-center gap-1"
+            >
+              Recharge now →
+            </a>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Grid stats (4 columns) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCard
+          label="Active load"
+          value={<AnimatedNumber value={activePower} decimals={0} suffix=" W" />}
+          sub={`${devices.filter((d) => d.status === "on").length} devices on`}
+        />
+        <StatCard
+          label="Frequency"
+          value={
+            <AnimatedNumber
+              value={50 + (latest.voltage - 230) * 0.01}
+              decimals={2}
+              suffix=" Hz"
+            />
+          }
+          sub="Grid sync nominal"
+        />
+        <StatCard
+          label="Utility grid"
+          value={utilityProvider}
+          sub={`Meter: ${meterId}`}
+        />
+        <motion.div
+          whileHover={{ y: -2 }}
+          className="panel rounded-2xl p-5 flex flex-col justify-between"
+        >
+          <div>
+            <div className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Monthly Budget</div>
+            <div className="mt-2 text-2xl font-semibold tracking-tight">
+              {Math.round((energyUnits / energyBudget) * 100)}%
+              <span className="text-xs font-normal text-muted-foreground ml-1.5">
+                ({energyUnits.toFixed(0)}/{energyBudget} kWh)
+              </span>
+            </div>
+          </div>
+          <div className="w-full mt-3">
+            <div className="h-1.5 rounded-full overflow-hidden bg-secondary">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${Math.min(100, (energyUnits / energyBudget) * 100)}%` }}
+                transition={{ duration: 0.6 }}
+                className="h-full rounded-full"
+                style={{
+                  background: (energyUnits / energyBudget) > 0.2
+                    ? "linear-gradient(90deg, oklch(0.58 0.24 295), oklch(0.72 0.22 300))"
+                    : "oklch(0.62 0.24 25)",
+                }}
               />
-            }
-            sub="Grid sync nominal"
-          />
-        </div>
+            </div>
+          </div>
+        </motion.div>
       </div>
 
       {/* chart */}
